@@ -1,0 +1,52 @@
+{
+  "name": "dsh-desktop-restart",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Restart button for DSH Desktop placed directly above the sidebar account button",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "scripts": {
+    "check": "node .check-client.mjs && node .check-host.mjs && node .check-helper.mjs"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TixAn9/DSHdesktop-restart-bottom.git"
+  },
+  "homepage": "https://github.com/TixAn9/DSHdesktop-restart-bottom#readme",
+  "bugs": {
+    "url": "https://github.com/TixAn9/DSHdesktop-restart-bottom/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "desktop",
+    "restart"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "os": [
+    "win32"
+  ],
+  "license": "MIT"
+}

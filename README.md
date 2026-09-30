@@ -1,0 +1,67 @@
+# DSHdesktop-restart-bottom
+
+DSH 桌面端（DSH Desktop）左下角的一键重启按钮，位置**紧贴账户按钮上边界**，外观与账户按钮同一规格。
+
+> 面向 **DSH Desktop**（Electron 桌面端），不是 `dsh web` 浏览器端。
+
+## 为什么需要它
+
+DSH 桌面端的宿主进程（Host）由 Electron 壳拉起，壳**不会**在 Host 死亡后自动重启（它只弹自己的恢复对话框），也没有暴露渲染进程到壳的重启通道。因此：
+
+- 官方菜单里的「重启应用与 Host」只在**开发构建**（`!app.isPackaged`）中出现，打包版没有；
+- 社区常见的自重启插件（如 `dsh-restart`、`dsh-restart-button`）只重启 `dsh` 宿主进程，在桌面端会留下一个没有宿主的窗口；
+- 插件市场 `dshmarket` 在桌面端会把重启能力显式标为 `managedBy: 'desktop-host'`，即**拒绝代管**。
+
+本插件补上这一块：由宿主的 HTTP 路由把重启交给一个**脱离 Electron 进程树**的独立 PowerShell 助手，由它杀掉应用进程树、等端口真正释放、再用同一个可执行文件把应用启动回来。
+
+## 安装
+
+```bash
+# 从本仓库的 release 附件安装（推荐）
+dsh plugin --profile desktop add <tarball-url>
+
+# 或者直接用本地目录（开发用）
+dsh plugin --profile desktop add file:/绝对路径/dsh-desktop-restart
+dsh plugin --profile desktop add link:/绝对路径/dsh-desktop-restart   # 改动即时生效
+```
+
+桌面端 profile 名固定为 `desktop`（`~/.dsh/profiles/desktop`）。也可以在桌面端自带插件管理器里粘贴上面的 spec。
+
+安装后需要让页面重新加载一次 bundle 才会看到按钮。
+
+## 使用
+
+- **单击** → 变成「再次点击确认重启」（4 秒内有效）。重启会中断正在运行的任务，因此刻意做成两步，避免误触。
+- **再次点击** → 执行重启。按钮转圈，并轮询服务；服务恢复后页面自动刷新。
+- 若当前环境不支持（例如把它装到了浏览器端），按钮会置灰，悬停提示会说明原因。
+
+## 实现要点
+
+| 部分 | 说明 |
+|---|---|
+| 位置 | 注册到 `sidebar.footer.action` 列表槽位。侧边栏脚部 `footArea` 是纵向容器，依次渲染「动作区」和「账户按钮所在的 settings 区」，因此本槽位最后一行正好紧贴账户按钮上边界 —— 结构性对齐，不用绝对定位或运行时测量。 |
+| 外观 | 与账户按钮同规格：`height:44px`、`padding:6px`、`gap:8px`、`border-radius:var(--dsw-radius-md)`、`font-size:14px`；前置 24×24 圆形徽标，底色 `--dsw-alias-bg-skeleton`、图形 `--dsw-alias-label-tertiary`，全部走主题变量。 |
+| 重启 | `POST /dsh-desktop-restart`，仅接受**环回地址 + 同源**请求（复用 `dshmarket` 的判定规则，并把 Origin 按 authority 比较，以兼容桌面端 `dsh-app://app` 经壳转发、Origin 被改写的情形）。 |
+| 助手 | 生成的 PowerShell 脚本写到临时目录，用 `-File` 以脱离模式启动。**不能**用分块的 `-EncodedCommand`：该参数只接受一份载荷，分块会让脚本只执行第一段。 |
+| 自检 | 浏览器半没有可达的控制台，因此注册失败会把原因 `POST` 到 `/dsh-desktop-restart/beacon`，由宿主写进 `%TEMP%\dsh-desktop-restart.log`。 |
+
+## 已知边界
+
+- 重启会**关闭并重新打开整个应用**，正在运行的任务会中断。
+- 助手通过 `taskkill /F /T` 结束应用进程树（`app.quit()` 的清理路径在强制结束时不会走完）；若端口在等待窗口内始终未释放，助手会放弃启动，避免拉起第二个实例。
+- 仅支持 Windows（助手使用 `powershell.exe`）。
+- 插件包名是 `dsh-desktop-restart`，与仓库名不同，这不影响使用。
+
+## 开发校验
+
+仓库根目录带了三个自检脚本，用来在没有页面控制台的情况下验证两半：
+
+```bash
+node .check-client.mjs   # bundle 契约：注册 id、inject、字典、slot 选项
+node .check-host.mjs     # 宿主路由：方法/环回/同源/转发头等授权判定
+node .check-helper.mjs   # 生成 PowerShell 助手并做语法解析
+```
+
+## 许可
+
+MIT
