@@ -19,15 +19,22 @@ DSH 桌面端的宿主进程（Host）由 Electron 壳拉起，壳**不会**在 
 桌面端 profile 名固定为 `desktop`（`~/.dsh/profiles/desktop`）。任选一种：
 
 ```bash
-# 1) 直接从本仓库安装（推荐）
+# 1) release 直链（推荐，无需 git）
+dsh plugin --profile desktop add https://github.com/TixAn9/DSHdesktop-restart-bottom/releases/download/v1.0.0/dsh-desktop-restart-1.0.0.tgz
+
+# 2) 从仓库源码安装
 dsh plugin --profile desktop add github:TixAn9/DSHdesktop-restart-bottom
 
-# 2) 从本地目录安装
+# 3) 从本地目录安装
 dsh plugin --profile desktop add file:/绝对路径/dsh-desktop-restart
 dsh plugin --profile desktop add link:/绝对路径/dsh-desktop-restart   # 改动即时生效
 ```
 
 也可以粘贴到桌面端自带插件管理器的安装框里。
+
+tarball 直链由 `npm pack` 产出。可用 spec 形式（插件管理器的 `parseInstallSpec` 判定）：
+`https://….tgz` / `https://….tar.gz`、`github:owner/repo`、`package@version`、绝对路径目录、绝对路径 `.tgz`。
+**不支持** `.zip` 与相对路径。
 
 安装后需要**让页面重新加载一次** bundle 才会看到按钮（重开应用，或刷新页面）。
 
