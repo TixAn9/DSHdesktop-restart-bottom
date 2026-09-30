@@ -2,7 +2,7 @@
 
 DSH 桌面端（DSH Desktop）左下角的一键重启按钮，位置**紧贴账户按钮上边界**，外观与账户按钮同一规格。
 
-> 面向 **DSH Desktop**（Electron 桌面端），不是 `dsh web` 浏览器端。
+> 面向 **DSH Desktop**，不是 `dsh web`，也不是社区桌面端 。
 
 ## 为什么需要它
 
