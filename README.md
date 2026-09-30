@@ -16,18 +16,22 @@ DSH 桌面端的宿主进程（Host）由 Electron 壳拉起，壳**不会**在 
 
 ## 安装
 
-```bash
-# 从本仓库的 release 附件安装（推荐）
-dsh plugin --profile desktop add <tarball-url>
+桌面端 profile 名固定为 `desktop`（`~/.dsh/profiles/desktop`）。任选一种：
 
-# 或者直接用本地目录（开发用）
+```bash
+# 1) 直接从本仓库安装（推荐）
+dsh plugin --profile desktop add github:TixAn9/DSHdesktop-restart-bottom
+
+# 2) 从本地目录安装
 dsh plugin --profile desktop add file:/绝对路径/dsh-desktop-restart
 dsh plugin --profile desktop add link:/绝对路径/dsh-desktop-restart   # 改动即时生效
 ```
 
-桌面端 profile 名固定为 `desktop`（`~/.dsh/profiles/desktop`）。也可以在桌面端自带插件管理器里粘贴上面的 spec。
+也可以粘贴到桌面端自带插件管理器的安装框里。
 
-安装后需要让页面重新加载一次 bundle 才会看到按钮。
+安装后需要**让页面重新加载一次** bundle 才会看到按钮（重开应用，或刷新页面）。
+
+> 注意：不要用 `--profile web`。本插件声明 `dsh.client.platform: web` 指的是**浏览器半**的目标平台，桌面端同样加载它；装到 web profile 不会出现在桌面端。
 
 ## 使用
 
